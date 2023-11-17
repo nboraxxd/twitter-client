@@ -1,40 +1,22 @@
 import { useEffect } from 'react'
-import { Link, useNavigate, useSearchParams } from 'react-router-dom'
-
-import getGoogleOAuthURL from '@/utils/getGoogleOAuthURL'
-import reactLogo from '@/assets/react.svg'
-import viteLogo from '/vite.svg'
-import { PATH } from '@/constants/path'
+import { useNavigate, useSearchParams } from 'react-router-dom'
 
 export default function Login() {
   const [params] = useSearchParams()
   const navigate = useNavigate()
-  const googleOAuthURL = getGoogleOAuthURL()
-
   useEffect(() => {
-    const accessToken = params.get('access_token')
-    const refreshToken = params.get('refresh_token')
+    const access_token = params.get('access_token')
+    const refresh_token = params.get('refresh_token')
+    const new_user = params.get('new_user')
+    const verify = params.get('verify')
+    console.log(new_user, verify)
 
-    localStorage.setItem('access_token', accessToken)
-    localStorage.setItem('refresh_token', refreshToken)
-
-    if (localStorage.getItem('access_token') && localStorage.getItem('refresh_token')) {
-      navigate(PATH.home)
-    }
-  }, [navigate, params])
-
-  return (
-    <>
-      <div>
-        <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank" rel="noreferrer">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Google OAuth 2.0</h1>
-      <Link to={googleOAuthURL}>Login with Google</Link>
-    </>
-  )
+    // ở đây mình chỉ test UI cho trường hợp login
+    // Trường hợp register thì bạn nào biết Front-end React có thể tự làm thêm UI cho nó nhé
+    // Dựa vào new_user, verify để biết là user mới hay user cũ và đã verify email hay chưa
+    localStorage.setItem('access_token', access_token)
+    localStorage.setItem('refresh_token', refresh_token)
+    navigate('/')
+  }, [params, navigate])
+  return <div>Login</div>
 }

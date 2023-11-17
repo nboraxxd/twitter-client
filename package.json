@@ -14,6 +14,7 @@
   },
   "dependencies": {
     "@vidstack/react": "^1.5.1",
+    "axios": "^1.6.2",
     "hls.js": "^1.4.12",
     "media-icons": "^1.0.0",
     "react": "^18.2.0",

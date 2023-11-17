@@ -1,8 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 
 import { PATH } from '@/constants/path'
-
-import { Home, Login } from '@/page'
+import { Home, Login, VerifyEmail } from '@/page'
 
 const router = createBrowserRouter([
   {
@@ -12,6 +11,10 @@ const router = createBrowserRouter([
   {
     path: PATH.login,
     element: <Login />,
+  },
+  {
+    path: PATH.verify,
+    element: <VerifyEmail />,
   },
 ])
 
