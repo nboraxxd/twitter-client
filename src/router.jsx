@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 
 import { PATH } from '@/constants/path'
-import { Home, Login, VerifyEmail } from '@/page'
+import { Home, Login, ResetPassword, VerifyEmail } from '@/page'
 
 const router = createBrowserRouter([
   {
@@ -15,6 +15,10 @@ const router = createBrowserRouter([
   {
     path: PATH.verify,
     element: <VerifyEmail />,
+  },
+  {
+    path: PATH.resetPassword,
+    element: <ResetPassword />,
   },
 ])
 
