@@ -1,7 +1,7 @@
 import { createBrowserRouter } from 'react-router-dom'
 
 import { PATH } from '@/constants/path'
-import { Home, Login, ResetPassword, VerifyEmail } from '@/page'
+import { Chat, Home, Login, ResetPassword, VerifyEmail, Video } from '@/page'
 
 const router = createBrowserRouter([
   {
@@ -19,6 +19,14 @@ const router = createBrowserRouter([
   {
     path: PATH.resetPassword,
     element: <ResetPassword />,
+  },
+  {
+    path: PATH.watch,
+    element: <Video />,
+  },
+  {
+    path: PATH.chat,
+    element: <Chat />,
   },
 ])
 
