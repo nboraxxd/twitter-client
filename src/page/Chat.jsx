@@ -6,7 +6,11 @@ export default function Chat() {
     const socket = io(import.meta.env.VITE_API_URL)
 
     socket.on('connect', () => {
-      console.log(socket.id)
+      socket.emit('join', { room: 'kitchen' })
+
+      socket.on('Hi', ({ message }) => {
+        console.log('🚧', message)
+      })
     })
 
     socket.on('disconnect', () => {
