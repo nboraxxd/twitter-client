@@ -10,9 +10,9 @@ export default function Video() {
   return (
     <MediaPlayer
       title="..."
-      src="http://localhost:3000/static/stream-hls-video/L9CItQRfVFTeYRisa141v/master.m3u8"
+      src=""
       aspectRatio="16/9"
-      // http://localhost:3000/static/stream-hls-video/EJHJkvPjYAsJWOyqt9PG8
+      // http://localhost:3000/static/stream-hls-video/L9CItQRfVFTeYRisa141v/master.m3u8
     >
       <MediaProvider />
 
