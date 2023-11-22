@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 const profile = JSON.parse(localStorage.getItem('profile'))
 export default function Chat() {
   const [value, setValue] = useState('')
-  const [message, setMessage] = useState([])
+  const [messages, setMessages] = useState([])
 
   useEffect(() => {
     socket.auth = {
@@ -13,8 +13,8 @@ export default function Chat() {
     socket.connect()
 
     socket.on('receive private message', (data) => {
-      console.log(data)
-      setMessage((message) => [...message, data])
+      const { content } = data
+      setMessages((message) => [...message, { content, isSender: false }])
     })
 
     return () => {
@@ -22,7 +22,7 @@ export default function Chat() {
     }
   }, [])
 
-  function handleSubmit(ev) {
+  function send(ev) {
     ev.preventDefault()
 
     socket.emit('private message', {
@@ -30,21 +30,22 @@ export default function Chat() {
       to: '654e5ab05edd311cb0bc3e38', // user_id
     })
     setValue('')
+    setMessages((message) => [...message, { content: value, isSender: true }])
   }
 
   return (
     <div>
-      <h1>Chat</h1>
-      <div className="">
-        {message.map((message, index) => {
+      <h1 className="text-xl font-semibold text-center mb-5">CHAT</h1>
+      <div className="mx-32">
+        {messages.map((message, index) => {
           return (
-            <div key={index}>
-              <strong>{message.from}</strong>: <span>{message.content}</span>
+            <div key={index} className="flex">
+              <p className={message.isSender ? 'ml-auto' : ''}>{message.content}</p>
             </div>
           )
         })}
       </div>
-      <form onSubmit={handleSubmit}>
+      <form onSubmit={send}>
         <input
           type="text"
           value={value}
