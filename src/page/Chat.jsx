@@ -1,8 +1,12 @@
 import socket from '@/utils/socket'
+import axios from 'axios'
 import { useEffect, useState } from 'react'
 
-const profile = JSON.parse(localStorage.getItem('profile'))
+const profile = JSON.parse(localStorage.getItem('profile')) || {}
+const usernames = ['user654ed7dafb4f9c263db2bcc1', 'user654e5ab05edd311cb0bc3e38']
+
 export default function Chat() {
+  const [receiveUserId, setReceiveUserId] = useState('')
   const [value, setValue] = useState('')
   const [messages, setMessages] = useState([])
 
@@ -27,15 +31,35 @@ export default function Chat() {
 
     socket.emit('private message', {
       content: value,
-      to: '654e5ab05edd311cb0bc3e38', // user_id
+      to: receiveUserId,
     })
     setValue('')
     setMessages((message) => [...message, { content: value, isSender: true }])
   }
 
+  function getProfile(username) {
+    axios.get(`/users/${username}`, { baseURL: import.meta.env.VITE_API_URL }).then((res) => {
+      setReceiveUserId(res?.data?.user?._id)
+    })
+  }
+
   return (
     <div>
-      <h1 className="text-xl font-semibold text-center mb-5">CHAT</h1>
+      <h1 className="text-xl font-semibold text-center mb-1">CHAT</h1>
+      <div className="flex flex-col items-center">
+        {usernames.map((username, index) => {
+          if (username === profile.username) return null
+          return (
+            <button
+              key={index}
+              className="border-purple-800 border max-w-[280px] py-2 px-5 bg-purple-800 text-white mb-10"
+              onClick={() => getProfile(username)}
+            >
+              {username}
+            </button>
+          )
+        })}
+      </div>
       <div className="mx-32">
         {messages.map((message, index) => {
           return (
