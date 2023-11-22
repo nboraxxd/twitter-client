@@ -31,6 +31,7 @@ export default function Chat() {
 
     socket.emit('private message', {
       content: value,
+      from: profile.username,
       to: receiveUserId,
     })
     setValue('')
