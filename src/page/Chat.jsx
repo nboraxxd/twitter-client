@@ -1,14 +1,19 @@
-import socket from '@/utils/socket'
-import axios from 'axios'
 import { useEffect, useState } from 'react'
+import axios from 'axios'
+import InfiniteScroll from 'react-infinite-scroll-component'
+
+import socket from '@/utils/socket'
 
 const profile = JSON.parse(localStorage.getItem('profile')) || {}
 const usernames = ['user654ed7dafb4f9c263db2bcc1', 'user654e5ab05edd311cb0bc3e38']
+const LIMIT = 10
+const PAGE = 1
 
 export default function Chat() {
   const [receiveUserId, setReceiveUserId] = useState('')
   const [value, setValue] = useState('')
   const [conversations, setConversations] = useState([])
+  const [pagination, setPagination] = useState({ page: PAGE, total_page: 0 })
 
   useEffect(() => {
     axios.get()
@@ -21,7 +26,7 @@ export default function Chat() {
     socket.on('receive_message', (data) => {
       const { payload } = data
 
-      setConversations((conversations) => [...conversations, payload])
+      setConversations((conversations) => [payload, ...conversations])
     })
 
     return () => {
@@ -36,15 +41,38 @@ export default function Chat() {
           baseURL: import.meta.env.VITE_API_URL,
           headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
           params: {
-            limit: 10,
-            page: 1,
+            limit: LIMIT,
+            page: PAGE,
           },
         })
         .then((res) => {
-          setConversations(res?.data?.result?.conversations.reverse())
+          const { conversations, page, total_page } = res.data.result
+
+          setConversations(conversations)
+          setPagination({ page, total_page })
         })
     }
   }, [receiveUserId])
+
+  function fetchMoreConversations() {
+    if (receiveUserId && pagination.page < pagination.total_page) {
+      axios
+        .get(`/conversations/receivers/${receiveUserId}`, {
+          baseURL: import.meta.env.VITE_API_URL,
+          headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
+          params: {
+            limit: LIMIT,
+            page: pagination.page + 1,
+          },
+        })
+        .then((res) => {
+          const { conversations, page, total_page } = res.data.result
+
+          setConversations((prev) => [...prev, ...conversations])
+          setPagination({ page, total_page })
+        })
+    }
+  }
 
   function send(ev) {
     ev.preventDefault()
@@ -59,7 +87,7 @@ export default function Chat() {
     })
 
     setValue('')
-    setConversations((conversations) => [...conversations, { ...conversation, _id: crypto.randomUUID() }])
+    setConversations((conversations) => [{ ...conversation, _id: crypto.randomUUID() }, ...conversations])
   }
 
   function getProfile(username) {
@@ -71,6 +99,7 @@ export default function Chat() {
   return (
     <div>
       <h1 className="text-xl font-semibold text-center mb-1">CHAT</h1>
+
       <div className="flex flex-col items-center">
         {usernames.map((username, index) => {
           if (username === profile.username) return null
@@ -85,15 +114,37 @@ export default function Chat() {
           )
         })}
       </div>
-      <div className="mx-32">
-        {conversations.map((conversation) => {
-          return (
-            <div key={conversation._id} className="flex">
-              <p className={conversation.sender_id === profile._id ? 'ml-auto' : ''}>{conversation.content}</p>
-            </div>
-          )
-        })}
+
+      <div
+        id="scrollableDiv"
+        className="max-w-xl m-auto"
+        style={{
+          height: 200,
+          overflow: 'auto',
+          display: 'flex',
+          flexDirection: 'column-reverse',
+        }}
+      >
+        {/*Put the scroll bar always on the bottom*/}
+        <InfiniteScroll
+          dataLength={conversations.length}
+          next={fetchMoreConversations}
+          style={{ display: 'flex', flexDirection: 'column-reverse' }} //To put endMessage and loader to the top.
+          inverse={true}
+          hasMore={pagination.page < pagination.total_page}
+          loader={<h4>Loading...</h4>}
+          scrollableTarget="scrollableDiv"
+        >
+          {conversations.map((conversation) => {
+            return (
+              <div key={conversation._id} className="flex">
+                <p className={conversation.sender_id === profile._id ? 'ml-auto' : ''}>{conversation.content}</p>
+              </div>
+            )
+          })}
+        </InfiniteScroll>
       </div>
+
       <form onSubmit={send}>
         <input
           type="text"
