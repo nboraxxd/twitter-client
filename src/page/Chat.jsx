@@ -8,17 +8,20 @@ const usernames = ['user654ed7dafb4f9c263db2bcc1', 'user654e5ab05edd311cb0bc3e38
 export default function Chat() {
   const [receiveUserId, setReceiveUserId] = useState('')
   const [value, setValue] = useState('')
-  const [messages, setMessages] = useState([])
+  const [conversations, setConversations] = useState([])
 
   useEffect(() => {
+    axios.get()
+
     socket.auth = {
       _id: profile._id,
     }
     socket.connect()
 
-    socket.on('receive private message', (data) => {
-      const { content } = data
-      setMessages((message) => [...message, { content, isSender: false }])
+    socket.on('receive_message', (data) => {
+      const { payload } = data
+
+      setConversations((conversations) => [...conversations, payload])
     })
 
     return () => {
@@ -26,16 +29,37 @@ export default function Chat() {
     }
   }, [])
 
+  useEffect(() => {
+    if (receiveUserId) {
+      axios
+        .get(`/conversations/receivers/${receiveUserId}`, {
+          baseURL: import.meta.env.VITE_API_URL,
+          headers: { Authorization: `Bearer ${localStorage.getItem('access_token')}` },
+          params: {
+            limit: 10,
+            page: 1,
+          },
+        })
+        .then((res) => {
+          setConversations(res?.data?.result?.conversations.reverse())
+        })
+    }
+  }, [receiveUserId])
+
   function send(ev) {
     ev.preventDefault()
-
-    socket.emit('private message', {
+    const conversation = {
       content: value,
-      from: profile.username,
-      to: receiveUserId,
+      sender_id: profile._id,
+      receiver_id: receiveUserId,
+    }
+
+    socket.emit('send_message', {
+      payload: conversation,
     })
+
     setValue('')
-    setMessages((message) => [...message, { content: value, isSender: true }])
+    setConversations((conversations) => [...conversations, { ...conversation, _id: crypto.randomUUID() }])
   }
 
   function getProfile(username) {
@@ -62,10 +86,10 @@ export default function Chat() {
         })}
       </div>
       <div className="mx-32">
-        {messages.map((message, index) => {
+        {conversations.map((conversation) => {
           return (
-            <div key={index} className="flex">
-              <p className={message.isSender ? 'ml-auto' : ''}>{message.content}</p>
+            <div key={conversation._id} className="flex">
+              <p className={conversation.sender_id === profile._id ? 'ml-auto' : ''}>{conversation.content}</p>
             </div>
           )
         })}
