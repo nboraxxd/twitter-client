@@ -19,7 +19,7 @@ export default function Chat() {
     axios.get()
 
     socket.auth = {
-      _id: profile._id,
+      Authorization: `Bearer ${localStorage.getItem('access_token')}`,
     }
     socket.connect()
 
@@ -29,6 +29,9 @@ export default function Chat() {
       setConversations((conversations) => [payload, ...conversations])
     })
 
+    socket.on('connect_error', (err) => {
+      console.log('🔥 ~ useEffect ~ err:', err.data)
+    })
     return () => {
       socket.disconnect()
     }
