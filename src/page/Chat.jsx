@@ -30,8 +30,13 @@ export default function Chat() {
     })
 
     socket.on('connect_error', (err) => {
-      console.log('🔥 ~ useEffect ~ err:', err.data)
+      console.log(err.data)
     })
+
+    socket.on('disconnect', (reason) => {
+      console.log('🔥 ~ socket.on ~ reason:', reason)
+    })
+
     return () => {
       socket.disconnect()
     }
